@@ -3,7 +3,7 @@
 /*************************
 FPS Limit
 *************************/
-bool bFPSLimit, bForceWindowedMode;
+bool bFPSLimit, bForceWindowedMode, bForceWindowedMode;
 float fFPSLimit;
 
 HRESULT f_IDirect3DDevice9::Present(CONST RECT *pSourceRect, CONST RECT *pDestRect, HWND hDestWindowOverride, CONST RGNDATA *pDirtyRegion)
@@ -81,6 +81,9 @@ void ForceWindowed(D3DPRESENT_PARAMETERS *pPresentationParameters)
     int top = (int)(((float)DesktopResY / 2.0f) - ((float)pPresentationParameters->BackBufferHeight / 2.0f));
 
     pPresentationParameters->Windowed = true;
+    
+	if (bForceBorderless)
+		SetWindowLongA(pPresentationParameters->hDeviceWindow, GWL_STYLE, WS_VISIBLE | WS_POPUP);
 
     SetWindowPos(pPresentationParameters->hDeviceWindow, HWND_NOTOPMOST, left, top, pPresentationParameters->BackBufferWidth, pPresentationParameters->BackBufferHeight, SWP_SHOWWINDOW);
 }
@@ -194,7 +197,8 @@ bool WINAPI DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved) {
         GetModuleFileNameA(hm, path, sizeof(path));
         *strrchr(path, '\\') = '\0';
         strcat_s(path, "\\d3d9.ini");
-        bForceWindowedMode = GetPrivateProfileInt("MAIN", "ForceWindowedMode", 0, path) != 0;
+        bForceWindowedMode = GetPrivateProfileInt("MAIN", "ForceWindowed", 0, path) != 0;
+        bForceFullscreenMode = GetPrivateProfileInt("MAIN", "ForceFullscreen", 0, path) != 0;
         fFPSLimit = static_cast<float>(GetPrivateProfileInt("MAIN", "FPSLimit", 0, path));
         if (fFPSLimit)
             bFPSLimit = true;
